@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>베스킨라빈스31 - CPU 대전</title>
+<style>
+body {
+  margin: 0;
+  font-family: 'Pretendard', sans-serif;
+  background: linear-gradient(135deg, #fcd0d0, #f8bcbc); /* 초기: 플레이어 배경 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  transition: background 0.5s;
+}
+.container {
+  width: 360px;
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,.2);
+}
+h1 { margin: 0 0 10px; }
+.status { margin-bottom: 10px; font-size: 16px; }
+.number {
+  font-size: 48px;
+  margin: 20px 0;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s;
+}
+.number.active {
+  transform: scale(1.2);
+}
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  font-size: 16px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #667eea;
+  color: white;
+}
+.home-btn { background: #bbb; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🍦 BR 31</h1>
+  <div class="status" id="status">당신 차례입니다</div>
+  <div class="number" id="number">0</div>
+  <button id="endTurnBtn">턴 넘기기</button>
+  <button class="home-btn" onclick="location.href='index.html'">🏠 홈으로</button>
+</div>
+
+<script>
+let current = 0;
+let clickCount = 0;
+let playerTurn = true;
+let difficulty = "hard";
+const WIN_NUMBERS = [2,6,10,14,18,22,26,30];
+
+const urlParams = new URLSearchParams(window.location.search);
+if(urlParams.has("level")) difficulty = urlParams.get("level");
+
+const numberEl = document.getElementById("number");
+const statusEl = document.getElementById("status");
+const endTurnBtn = document.getElementById("endTurnBtn");
+
+// 플레이어/CPU 배경색
+function setPlayerBackground(isPlayer){
+  if(isPlayer){
+    document.body.style.background = "linear-gradient(135deg, #fcd0d0, #f8bcbc)";
+  } else {
+    document.body.style.background = "linear-gradient(135deg, #a6c1ee, #8db3f7)";
+  }
+}
+
+// 숫자 업데이트
+function updateNumber(){ numberEl.textContent = current; }
+
+// 승패 체크
+function checkLose(who){
+  if(current >= 31){
+    alert(who === "player" ? "😢 졌어요!" : "🎉 이겼어요!");
+    location.href = "index.html";
+  }
+}
+
+// 숫자 클릭
+numberEl.onclick = () => {
+  if(!playerTurn) return;
+  if(clickCount >=3) return;
+
+  // 강조: 살짝 커지기
+  numberEl.classList.add("active");
+  setTimeout(()=>numberEl.classList.remove("active"), 200);
+
+  current++;
+  clickCount++;
+  updateNumber();
+  checkLose("player");
+
+  if(clickCount === 3){
+    // 0.6초 딜레이 후 CPU 차례
+    setTimeout(endPlayerTurn, 600);
+  }
+};
+
+// 턴 넘기기 버튼
+endTurnBtn.onclick = () => {
+  if(!playerTurn) return;
+  if(clickCount === 0) return;
+  endPlayerTurn();
+};
+
+function endPlayerTurn(){
+  playerTurn = false;
+  clickCount = 0;
+  statusEl.textContent = "컴퓨터 차례입니다";
+  setPlayerBackground(false); // CPU 배경 적용
+  setTimeout(cpuTurn, 800);
+}
+
+// CPU 턴
+function cpuTurn(){
+  let steps;
+  if(difficulty === "easy"){
+    steps = Math.floor(Math.random()*3)+1;
+  } else if(difficulty === "normal"){
+    if(Math.random()<0.5){
+      steps = nextWinSteps();
+    } else {
+      steps = Math.floor(Math.random()*3)+1;
+    }
+  } else { // hard
+    steps = nextWinSteps();
+  }
+
+  steps = Math.min(steps, 31-current);
+  let i=0;
+
+  const interval = setInterval(()=>{
+    current++;
+    updateNumber();
+    checkLose("cpu");
+    i++;
+    if(i>=steps){
+      clearInterval(interval);
+      playerTurn = true;
+      statusEl.textContent = "당신 차례입니다";
+      setPlayerBackground(true); // 플레이어 배경 적용
+    }
+  }, 600);
+}
+
+// 다음 필승 숫자 계산
+function nextWinSteps(){
+  for(let i=0;i<WIN_NUMBERS.length;i++){
+    let num = WIN_NUMBERS[i];
+    if(num>current && num-current<=3) return num-current;
+  }
+  return Math.min(3,31-current);
+}
+
+// 초기 배경 설정
+setPlayerBackground(true);
+</script>
+</body>
+</html>

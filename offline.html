@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>BR31 오프라인 모드</title>
+<style>
+* { box-sizing: border-box; font-family:'Pretendard', sans-serif; }
+
+body {
+  margin:0; 
+  height:100vh;
+  background: linear-gradient(135deg,#fbc2eb,#a6c1ee);
+  display:flex; justify-content:center; align-items:center;
+}
+
+.container{
+  background:white; 
+  width:380px; 
+  padding:40px 30px; 
+  border-radius:20px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.15); 
+  text-align:center;
+}
+
+h1{margin-bottom:10px; font-size:26px;}
+p{margin-bottom:30px; color:#555;}
+
+.player-buttons{
+  display:flex; 
+  flex-direction:column; 
+  gap:15px; 
+  margin-bottom:25px;
+}
+
+.player-buttons button{
+  padding:14px; 
+  font-size:18px; 
+  border-radius:12px; 
+  border:none;
+  cursor:pointer; 
+  background:#ff8fab; 
+  color:white; 
+  font-weight:bold;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.player-buttons button:hover{
+  background:#ff7096; 
+  transform:scale(1.03);
+}
+
+.home-btn{
+  margin-top:10px; 
+  background:none; 
+  border:none; 
+  color:#666;
+  cursor:pointer; 
+  font-size:14px; 
+  text-decoration:underline;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>👥 오프라인 모드</h1>
+  <p>플레이할 인원을 선택하세요</p>
+  <div class="player-buttons">
+    <button onclick="startGame(2)">2명 플레이</button>
+    <button onclick="startGame(3)">3명 플레이</button>
+    <button onclick="startGame(4)">4명 플레이</button>
+  </div>
+  <button class="home-btn" onclick="goHome()">← 홈으로 돌아가기</button>
+</div>
+
+<script>
+// 플레이어 수 선택 시 offline_game.html로 이동
+function startGame(players){
+  location.href = "offline_game.html?players=" + players;
+}
+
+// 홈으로 이동
+function goHome(){ 
+  location.href = "index.html"; 
+}
+</script>
+</body>
+</html>

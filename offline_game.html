@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>BR31 오프라인 게임</title>
+<style>
+body {
+  margin:0; font-family:'Pretendard', sans-serif;
+  display:flex; justify-content:center; align-items:center;
+  min-height:100vh; transition: background-color 0.5s;
+  background-color:#fbc2eb;
+}
+.container {
+  width:500px; height:550px; position:relative; text-align:center;
+  background:white; border-radius:20px; box-shadow:0 20px 40px rgba(0,0,0,0.15);
+  padding:20px; z-index:1;
+}
+h1{margin:10px 0;}
+.status{margin-bottom:10px; font-size:16px;}
+.number{
+  font-size:48px; margin:20px 0; font-weight:bold; cursor:pointer; user-select:none;
+  transition: transform 0.2s;
+}
+.number.active{
+  transform: scale(1.2);
+}
+button{
+  width:100%; padding:12px; margin-top:8px; font-size:16px; border:none; border-radius:12px;
+  cursor:pointer; background:#667eea; color:white;
+}
+.home-btn{background:#bbb; margin-top:5px;}
+.roulette-container{
+  width:100%; height:50px; position:relative; margin:20px 0; z-index:1;
+}
+.ball{
+  width:40px; height:40px; border-radius:50%; position:absolute; top:0; 
+  display:flex; justify-content:center; align-items:center; color:white; font-weight:bold;
+  font-size:16px; cursor:pointer; transition: left 0.3s;
+}
+.player-icon{
+  width:50px; height:50px; border-radius:50%; position:absolute;
+  display:flex; justify-content:center; align-items:center; color:white;
+  font-weight:bold; font-size:16px; transition: transform 0.3s, box-shadow 0.3s;
+  z-index:2;
+}
+.player-icon.active{
+  transform: scale(1.3);
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🍦 BR31 오프라인</h1>
+  <div class="roulette-container" id="rouletteContainer"></div>
+  <div id="playerIcons"></div>
+  <div class="status" id="status">턴 순서 정하는 중...</div>
+  <div class="number" id="number">0</div>
+  <button id="endTurnBtn">턴 넘기기</button>
+  <button class="home-btn" onclick="location.href='index.html'">🏠 홈으로</button>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+  const urlParams = new URLSearchParams(window.location.search);
+  let numPlayers = parseInt(urlParams.get("players")) || 2;
+
+  const colors=["#ffb3b3","#a0c4ff","#b0ffb3","#ffeaa0"];
+  let positions=[];
+  if(numPlayers===2){
+    positions=[{top:"50%",left:"-120px"},{top:"50%",right:"-120px"}];
+  } else if(numPlayers===3){
+    positions=[{top:"-60px",left:"-60px"},{top:"calc(100% + 10px)",left:"-60px"},{top:"-60px",right:"-60px"}];
+  } else {
+    positions=[{top:"-60px",left:"-60px"},{top:"calc(100% + 10px)",left:"-60px"},{top:"-60px",right:"-60px"},{top:"calc(100% + 10px)",right:"-60px"}];
+  }
+
+  const players=[];
+  for(let i=0;i<numPlayers;i++){
+    players.push({name:"P"+(i+1), color:colors[i], iconPos:positions[i]});
+  }
+
+  function shuffleArray(array){
+    for(let i=array.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [array[i],array[j]]=[array[j],array[i]];
+    }
+    return array;
+  }
+
+  // 룰렛 공 생성
+  const rouletteContainer=document.getElementById("rouletteContainer");
+  const ballEls=[];
+  function createBalls(){
+    rouletteContainer.innerHTML="";
+    ballEls.length=0;
+    for(let i=0;i<numPlayers;i++){
+      const ball=document.createElement("div");
+      ball.className="ball";
+      ball.style.background=players[i].color;
+      ball.textContent=players[i].name;
+      ball.style.left=Math.random()*(rouletteContainer.clientWidth-40)+"px";
+      rouletteContainer.appendChild(ball);
+      ballEls.push(ball);
+    }
+  }
+  createBalls();
+
+  // 플레이어 아이콘 생성
+  const playerIconsContainer=document.getElementById("playerIcons");
+  const iconEls=[];
+  function createIcons(){
+    playerIconsContainer.innerHTML="";
+    iconEls.length=0;
+    for(let i=0;i<numPlayers;i++){
+      const icon=document.createElement("div");
+      icon.className="player-icon";
+      icon.textContent=players[i].name;
+      icon.style.background=players[i].color;
+      if(players[i].iconPos.top) icon.style.top=players[i].iconPos.top;
+      if(players[i].iconPos.bottom) icon.style.bottom=players[i].iconPos.bottom;
+      if(players[i].iconPos.left) icon.style.left=players[i].iconPos.left;
+      if(players[i].iconPos.right) icon.style.right=players[i].iconPos.right;
+      playerIconsContainer.appendChild(icon);
+      iconEls.push(icon);
+    }
+  }
+  createIcons();
+
+  // 랜덤 순서 결정
+  let turnOrder = shuffleArray([...players]);
+  const turnNames = turnOrder.map(p=>p.name);
+
+  function startRoulette(){
+    const duration = 2000;
+    const startTime = performance.now();
+    const amplitude = 70;
+
+    function animate(time){
+      let elapsed = time - startTime;
+      if(elapsed >= duration){
+        const spacing = (rouletteContainer.clientWidth-40)/(numPlayers-1);
+        ballEls.forEach(ball=>{
+          const player = turnOrder.find(p=>p.name===ball.textContent);
+          const idx = turnOrder.indexOf(player);
+          ball.style.transition = "left 1s ease-out";
+          ball.style.left = (idx*spacing)+"px";
+        });
+        setTimeout(()=>{
+          alert("턴 순서 확정: "+turnNames.join(", "));
+          startTurn();
+        }, 1000);
+        return;
+      }
+
+      ballEls.forEach((ball,i)=>{
+        const base = (rouletteContainer.clientWidth-40)*Math.random();
+        const offset = Math.sin(elapsed/100 + i)*amplitude;
+        let newLeft = Math.max(0, Math.min(rouletteContainer.clientWidth-40, base + offset));
+        ball.style.left = newLeft + "px";
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  let current=0, clickCount=0, turnIndex=0, playerTurn=true;
+  const numberEl=document.getElementById("number");
+  const statusEl=document.getElementById("status");
+  const endTurnBtn=document.getElementById("endTurnBtn");
+
+  function startTurn(){
+    const currentPlayer=turnOrder[turnIndex];
+    document.body.style.backgroundColor=currentPlayer.color;
+    statusEl.textContent=currentPlayer.name+" 차례입니다";
+    clickCount=0;
+    playerTurn=true;
+    iconEls.forEach((el)=>el.classList.remove("active"));
+    const currentIcon = iconEls.find(el=>el.textContent===currentPlayer.name);
+    if(currentIcon) currentIcon.classList.add("active");
+  }
+
+  numberEl.onclick=()=>{
+    if(!playerTurn) return;
+    if(clickCount>=3) return;
+
+    // 숫자 클릭 시 살짝 커지기
+    numberEl.classList.add("active");
+    setTimeout(()=>numberEl.classList.remove("active"), 200);
+
+    current++; clickCount++;
+    numberEl.textContent=current;
+    checkLose(turnOrder[turnIndex].name);
+    if(clickCount===3) endPlayerTurn();
+  }
+
+  endTurnBtn.onclick=()=>{
+    if(!playerTurn) return;
+    if(clickCount===0) return;
+    endPlayerTurn();
+  }
+
+  function endPlayerTurn(){
+    playerTurn=false;
+    turnIndex=(turnIndex+1)%numPlayers;
+    startTurn();
+  }
+
+  function checkLose(who){
+    if(current>=31){
+      alert(who+"가 😢 졌습니다!");
+      location.href="index.html";
+    }
+  }
+
+  startRoulette();
+
+});
+</script>
+</body>
+</html>

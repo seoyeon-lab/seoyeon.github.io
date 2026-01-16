@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>베스킨라빈스 31</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background: white;
+      width: 420px;
+      padding: 45px 35px;
+      border-radius: 24px;
+      box-shadow: 0 25px 45px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 35px;
+    }
+
+    .mode-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .mode-btn {
+      padding: 18px;
+      font-size: 18px;
+      border-radius: 16px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .cpu {
+      background: #ff8fab;
+      color: white;
+    }
+
+    .offline {
+      background: #8ecae6;
+      color: white;
+    }
+
+    .mode-btn:hover {
+      transform: none; /* 떠오르는 효과 제거 */
+      box-shadow: 0 0 15px rgba(0,0,0,0.25); /* 사방 강조 그림자 */
+      filter: brightness(1.1); /* 밝기 강조 */
+    }
+
+    /* ===== 난이도 선택 모달 ===== */
+
+    .modal-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal {
+      background: white;
+      width: 320px;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+    .modal h3 {
+      margin-bottom: 20px;
+    }
+
+    .level-btn {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      transition: box-shadow 0.15s, filter 0.15s, transform 0.1s;
+      /* 모바일 터치용 축소 효과 준비 */
+    }
+
+    .easy { background: #90db9a; }
+    .normal { background: #ffd166; color: #333; }
+    .hard { background: #ef476f; }
+
+    .level-btn:hover {
+      box-shadow: 0 0 15px rgba(0,0,0,0.25); /* 사방 강조 그림자 */
+      filter: brightness(1.1); /* 밝기 강조 */
+      transform: none; /* 떠오름 제거 */
+    }
+
+    /* 모바일 터치 시 살짝 축소 */
+    .level-btn:active {
+      transform: scale(0.97);
+    }
+
+    .close-btn {
+      margin-top: 10px;
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>🍦 Baskin Robbins 31</h1>
+    <h2>플레이 모드를 선택하세요</h2>
+
+    <div class="mode-buttons">
+      <button class="mode-btn cpu" onclick="openModal()">
+        🤖 컴퓨터와 대전
+      </button>
+
+      <button class="mode-btn offline" onclick="goOffline()">
+        👥 오프라인 모드
+      </button>
+    </div>
+  </div>
+
+  <!-- 난이도 선택 모달 -->
+  <div class="modal-bg" id="modal">
+    <div class="modal">
+      <h3>난이도를 선택하세요</h3>
+
+      <button class="level-btn easy" onclick="startCPU('easy')">
+        초급
+      </button>
+      <button class="level-btn normal" onclick="startCPU('normal')">
+        중급
+      </button>
+      <button class="level-btn hard" onclick="startCPU('hard')">
+        고급
+      </button>
+
+      <button class="close-btn" onclick="closeModal()">취소</button>
+    </div>
+  </div>
+
+  <script>
+    function openModal() {
+      document.getElementById("modal").style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("modal").style.display = "none";
+    }
+
+    function startCPU(level) {
+      location.href = "cpu.html?level=" + level;
+    }
+
+    function goOffline() {
+      location.href = "offline.html";
+    }
+  </script>
+
+</body>
+</html>
